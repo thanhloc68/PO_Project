@@ -11,7 +11,6 @@ namespace POApplication.Controllers
     public class PoDetailController : Controller
     {
         private readonly POInfos _dbContext;
-
         public PoDetailController(POInfos dbContext)
         {
             _dbContext = dbContext;

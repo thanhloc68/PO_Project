@@ -5,67 +5,55 @@ using POApplication.Models;
 using POApplication.Wrappers;
 namespace POApplication.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class PoInfoController : Controller
+    [Route("api/[controller]")]
+    public class TransporterController : Controller
     {
         private readonly POInfos _dbContext;
-
-        public PoInfoController(POInfos dbContext)
+        public TransporterController(POInfos dbContext)
         {
             _dbContext = dbContext;
         }
         [HttpGet]
         public async Task<IActionResult> Index(int pageIndex, int pageSize)
         {
-            return await GetPagedDataAsync(pageIndex, pageSize, _dbContext.POInfomation);
+            var query = _dbContext.Transporter.AsNoTracking();
+            return await GetPagedDataAsync(pageIndex, pageSize, query);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id, int pageIndex, int pageSize)
         {
-            var query = _dbContext.POInfomation.Where(x => x.id == id);
-            return await GetPagedDataAsync(pageIndex, pageSize, _dbContext.POInfomation);
+            var query = _dbContext.Transporter.Where(x => x.ID == id).AsNoTracking();
+            return await GetPagedDataAsync(pageIndex, pageSize, query);
         }
         [HttpPost]
-        public async Task<IActionResult> AddPoInfo([FromBody] POInfomation pOInfomation)
+        public async Task<IActionResult> AddTransporter([FromBody] Transporter transporter)
         {
-            if (pOInfomation == null) return BadRequest("Không tìm thấy dữ liệu");
-            var query = new POInfomation
+            if (transporter == null) return BadRequest("Không tìm thấy dữ liệu");
+            var query = new Transporter
             {
-                MaterialCode = pOInfomation.MaterialCode,
-                CustomerRef = pOInfomation.CustomerRef,
-                GrossWeight = pOInfomation.GrossWeight,
-                Line = pOInfomation.Line,
-                MaterialDescription = pOInfomation.MaterialDescription,
-                NetWeight = pOInfomation.NetWeight,
-                Quantity = pOInfomation.Quantity,
-                SupplierRef = pOInfomation.SupplierRef,
-                UOM = pOInfomation.UOM,
-                Volumn = pOInfomation.Volumn
+                Name = transporter.Name,
+                Phone = transporter.Phone,
+                Address = transporter.Address,
+                Notes = transporter.Notes,
             };
             await _dbContext.AddAsync(query);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdatePoInfo(int id, [FromBody] POInfomation pOInfomation)
+        public async Task<IActionResult> UpdateTransporter(int id, [FromBody] Transporter transporter)
         {
-            if (id <= 0 && pOInfomation == null) return BadRequest("Dữ liệu không hợp lệ");
-            var check = await _dbContext.POInfomation.FindAsync(id);
+            if (id <= 0 && transporter == null) return BadRequest("Dữ liệu không hợp lệ");
+            var check = await _dbContext.Transporter.FindAsync(id);
             if (check == null) return BadRequest();
-            check.MaterialCode = pOInfomation.MaterialCode;
-            check.CustomerRef = pOInfomation.CustomerRef;
-            check.GrossWeight = pOInfomation.GrossWeight;
-            check.Line = pOInfomation.Line;
-            check.MaterialDescription = pOInfomation.MaterialDescription;
-            check.NetWeight = pOInfomation.NetWeight;
-            check.Quantity = pOInfomation.Quantity;
-            check.SupplierRef = pOInfomation.SupplierRef;
-            check.UOM = pOInfomation.UOM;
-            check.Volumn = pOInfomation.Volumn;
+            check.Name = transporter.Name;
+            check.Phone = transporter.Phone;
+            check.Address = transporter.Address;
+            check.Notes = transporter.Notes;
             try
             {
-                _dbContext.POInfomation.Update(check);
+                _dbContext.Transporter.Update(check);
                 await _dbContext.SaveChangesAsync();
                 return Ok();
             }
@@ -75,11 +63,11 @@ namespace POApplication.Controllers
             }
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePoInfo(int id)
+        public async Task<IActionResult> DeleteTransporter(int id)
         {
             try
             {
-                var poInfo = await _dbContext.POInfomation.FindAsync(id);
+                var poInfo = await _dbContext.Transporter.FindAsync(id);
                 if (poInfo == null) return BadRequest("Không tìm thấy ID");
                 _dbContext.Remove(poInfo);
                 await _dbContext.SaveChangesAsync();
@@ -90,12 +78,12 @@ namespace POApplication.Controllers
                 return StatusCode(500, $"Lỗi: {ex.Message}");
             }
         }
-        private async Task<IActionResult> GetPagedDataAsync(int pageIndex, int pageSize, IQueryable<POInfomation> query)
+        private async Task<IActionResult> GetPagedDataAsync(int pageIndex, int pageSize, IQueryable<Transporter> query)
         {
             try
             {
                 var list = await query
-                    .OrderBy(x => x.id)
+                    .OrderBy(x => x.ID)
                     .Skip((pageIndex - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
@@ -103,7 +91,7 @@ namespace POApplication.Controllers
                 var count = await query.CountAsync();
                 var totalPage = (int)Math.Ceiling(count / (double)pageSize);
 
-                var response = new PagedResponse<POInfomation>(list, pageIndex, totalPage)
+                var response = new PagedResponse<Transporter>(list, pageIndex, totalPage)
                 {
                     Message = "Data fetched successfully."
                 };
